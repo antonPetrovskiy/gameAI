@@ -11,6 +11,8 @@ import android.widget.TextView;
 
 import java.util.LinkedList;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
     static ImageButton p30;
@@ -34,12 +36,13 @@ public class MainActivity extends AppCompatActivity {
     ImageButton up;
     ImageButton right;
     ImageButton down;
+    ImageButton center;
 
     static TextView terminal;
 
 
 
-    Move m;
+    static Move m;
 
     int X = 3;
     int Y = 0;
@@ -55,28 +58,15 @@ public class MainActivity extends AppCompatActivity {
         initView();
         m = new Move(this);
         initButtonAction();
-
-        movement.add("30");
+        movement.addLast("30");
 
 
 
         initPlayerMap();
         generateMap();
-        mainThread();
-        showMap();
-        showPlayerMap();
-
-        p00.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                remove();
-                initPlayerMap();
-                generateMap();
-                mainThread();
-                showMap();
-                showPlayerMap();
-            }
-        });
+        //valueOfPosition();
+        //showMap();
+        //showPlayerMap();
         //generateMap();
         //showMap();
 
@@ -84,14 +74,47 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+    private static int gg = 3;
+    private static int bg = 0;
 
+    static public void cntReset() {
+        gg = 3;
+        bg = 0;
+    }
 
-    public void mainThread(){
+    public void move(){
+        int i = gg;
+        int j = bg;
 
-        //while(!m.checkPlace(X,Y)){
+            if(m.checkHole(i,0) || m.checkMonster(i,0)){
+                return;
+            }
 
+            if(!m.checkHole(i,j) && !m.checkMonster(i,j)){
+                m.move(i,j,i,j+1);
+            }else{
+                bg = 4;
+            }
 
+        if (bg >= 4) {
+            bg = 0;
 
+            while(movement.getLast().charAt(1)!='0'){
+                m.moveBack();
+            }
+            //movement.removeLast();
+            if (gg <= 0) {
+                gg = 3;
+            } else {
+                gg--;
+                m.move(gg, bg, gg, bg);
+            }
+        } else {
+            bg++;
+        }
+    }
+
+    public void valueOfPosition(){
             for(int i = 3; i  >= 0 ; i --){
                 for(int j = 0; j < 4; j ++){
                     X = i;
@@ -109,11 +132,6 @@ public class MainActivity extends AppCompatActivity {
 
                 }
             }
-
-
-
-
-       // }
     }
 
     public void initView(){
@@ -138,6 +156,7 @@ public class MainActivity extends AppCompatActivity {
         right = (ImageButton) findViewById(R.id.right);
         up = (ImageButton) findViewById(R.id.up);
         down = (ImageButton) findViewById(R.id.down);
+        center = (ImageButton) findViewById(R.id.center);
 
         terminal = (TextView) findViewById(R.id.terminalOutput);
         terminal.setMovementMethod(new ScrollingMovementMethod());
@@ -149,37 +168,56 @@ public class MainActivity extends AppCompatActivity {
         left.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                m.moveLeft();
+                m.move(Integer.parseInt(""+movement.getLast().charAt(0)),Integer.parseInt(""+movement.getLast().charAt(1)),Integer.parseInt(""+movement.getLast().charAt(0)),Integer.parseInt(""+movement.getLast().charAt(1))-1);
             }
         });
 
         right.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                m.moveRight();
+                m.move(Integer.parseInt(""+movement.getLast().charAt(0)),Integer.parseInt(""+movement.getLast().charAt(1)),Integer.parseInt(""+movement.getLast().charAt(0)),Integer.parseInt(""+movement.getLast().charAt(1))+1);
             }
         });
 
         up.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                m.moveUp();
+                m.move(Integer.parseInt(""+movement.getLast().charAt(0)),Integer.parseInt(""+movement.getLast().charAt(1)),Integer.parseInt(""+movement.getLast().charAt(0))-1,Integer.parseInt(""+movement.getLast().charAt(1)));
             }
         });
 
         down.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                m.moveDown();
+                m.move(Integer.parseInt(""+movement.getLast().charAt(0)),Integer.parseInt(""+movement.getLast().charAt(1)),Integer.parseInt(""+movement.getLast().charAt(0))+1,Integer.parseInt(""+movement.getLast().charAt(1)));
+            }
+        });
+
+        center.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                move();
+            }
+        });
+
+        p00.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                restartGame();
             }
         });
     }
 
 
-
-
-
-
+    public static void restartGame(){
+        terminal.setText("");
+        cntReset();
+        remove();
+        initPlayerMap();
+        generateMap();
+        movement.clear();
+        movement.addLast("30");
+    }
 
     public static void initPlayerMap(){
         for(int i = 0; i < 4 ; i ++){
@@ -199,14 +237,6 @@ public class MainActivity extends AppCompatActivity {
         getButton(3,0).setImageResource(setEnemy('p'));
         map[3][0] = 'p';
 
-
-
-        do {
-            x = rand.nextInt(4);
-            y = rand.nextInt(4);
-        }while(map[x][y] != 'o');
-        getButton(x,y).setImageResource(setEnemy('h'));
-        map[x][y] = 'h';
 
         do {
             x = rand.nextInt(4);
@@ -229,6 +259,10 @@ public class MainActivity extends AppCompatActivity {
         getButton(x,y).setImageResource(setEnemy('g'));
         map[x][y] = 'g';
 
+
+        if(m.checkHole(3,0) || m.checkMonster(3,0)){
+            terminal.append("Cant move. No safety moves" + "\n");
+        }
     }
 
     public void showMap(){
@@ -315,5 +349,9 @@ public class MainActivity extends AppCompatActivity {
         p01.setImageResource(0);
         p02.setImageResource(0);
         p03.setImageResource(0);
+    }
+
+    public void checkState(){
+
     }
 }

@@ -2,6 +2,8 @@ package com.example.tosch.gameai;
 
 import android.app.Activity;
 
+import java.util.LinkedList;
+
 /**
  * Created by tosch on 20.09.2017.
  */
@@ -15,116 +17,36 @@ public class Move {
 
 
 
-    public void moveRight(){
-        for(int i = 0; i < 4 ; i ++){
-            for(int j = 0; j < 4; j ++){
-                if(MainActivity.map[i][j] == 'p' && j != 3){
-                    MainActivity.terminal.append("Moved to " + i + (j+1) + "\n");
-                    if(checkPlace(i, j+1)){
-                        MainActivity.remove();
-                        MainActivity.initPlayerMap();
-                        MainActivity.generateMap();
-                        return;
-                    }
-                    MainActivity.map[i][j] = 'o';
-                    MainActivity.map[i][j+1] = 'p';
-                    MainActivity.getButton(i,j).setImageResource(0);
-                    MainActivity.getButton(i,j+1).setImageResource(R.drawable.player);
-                    if(checkHole(i,j+1))
-                        MainActivity.terminal.append("Hole is near" + "\n");
-                    if(checkMonster(i,j+1))
-                        MainActivity.terminal.append("Monster is near" + "\n");
-                    return;
-                }
-            }
-        }
-    }
 
-    public void moveLeft(){
-        for(int i = 0; i < 4 ; i ++){
-            for(int j = 0; j < 4; j ++){
-                if(MainActivity.map[i][j] == 'p' && j != 0){
-                    MainActivity.terminal.append("Moved to " + i + (j-1) + "\n");
-                    if(checkPlace(i, j-1)){
-                        MainActivity.remove();
-                        MainActivity.initPlayerMap();
-                        MainActivity.generateMap();
-                        return;
-                    }
-                    MainActivity.map[i][j] = 'o';
-                    MainActivity.map[i][j-1] = 'p';
-                    MainActivity.getButton(i,j).setImageResource(0);
-                    MainActivity.getButton(i,j-1).setImageResource(R.drawable.player);
-                    if(checkHole(i,j-1))
-                        MainActivity.terminal.append("Hole is near" + "\n");
-                    if(checkMonster(i,j-1))
-                        MainActivity.terminal.append("Monster is near" + "\n");
-                    return;
-                }
-            }
-        }
-    }
-
-    public void moveUp(){
-        for(int i = 0; i < 4 ; i ++){
-            for(int j = 0; j < 4; j ++){
-                if(MainActivity.map[i][j] == 'p' && i != 0){
-                    MainActivity.terminal.append("Moved to " + (i-1) + j + "\n");
-                    if(checkPlace(i-1, j)){
-                        MainActivity.remove();
-                        MainActivity.initPlayerMap();
-                        MainActivity.generateMap();
-                        return;
-                    }
-                    MainActivity.map[i][j] = 'o';
-                    MainActivity.map[i-1][j] = 'p';
-                    MainActivity.getButton(i,j).setImageResource(0);
-                    MainActivity.getButton(i-1,j).setImageResource(R.drawable.player);
-                    if(checkHole(i-1,j))
-                        MainActivity.terminal.append("Hole is near" + "\n");
-                    if(checkMonster(i-1,j))
-                        MainActivity.terminal.append("Monster is near" + "\n");
-                    return;
-                }
-            }
-        }
-    }
-
-    public void moveDown(){
-        for(int i = 0; i < 4 ; i ++){
-            for(int j = 0; j < 4; j ++){
-                if(MainActivity.map[i][j] == 'p' && i != 3){
-                    MainActivity.terminal.append("Moved to " + (i+1) + j + "\n");
-                    if(checkPlace(i+1, j)){
-                        MainActivity.remove();
-                        MainActivity.initPlayerMap();
-                        MainActivity.generateMap();
-                        return;
-                    }
-                    MainActivity.map[i][j] = 'o';
-                    MainActivity.map[i+1][j] = 'p';
-                    MainActivity.getButton(i,j).setImageResource(0);
-                    MainActivity.getButton(i+1,j).setImageResource(R.drawable.player);
-                    if(checkHole(i+1,j))
-                        MainActivity.terminal.append("Hole is near" + "\n");
-                    if(checkMonster(i+1,j))
-                        MainActivity.terminal.append("Monster is near" + "\n");
-                    return;
-                }
-            }
-        }
-    }
 
     public void moveBack(){
-
-    }
-
-    public void go(){
         int x = Integer.parseInt(""+MainActivity.movement.getLast().charAt(0));
         int y = Integer.parseInt(""+MainActivity.movement.getLast().charAt(1));
-
-
+        MainActivity.movement.removeLast();
+        int x1 = Integer.parseInt(""+MainActivity.movement.getLast().charAt(0));
+        int y1 = Integer.parseInt(""+MainActivity.movement.getLast().charAt(1));
+        move(x,y,x1,y1);
+        MainActivity.movement.removeLast();
     }
+
+    public void move(int x, int y, int x1, int y1){
+            MainActivity.terminal.append("Moved to " + x1 + y1 + "\n");
+            if(checkPlace(x1, y1)){
+                MainActivity.restartGame();
+                return;
+            }
+            MainActivity.map[x][y] = 'o';
+            MainActivity.map[x1][y1] = 'p';
+            MainActivity.getButton(x,y).setImageResource(0);
+            MainActivity.getButton(x1,y1).setImageResource(R.drawable.player);
+            if(checkHole(x1,y1))
+                MainActivity.terminal.append("Hole is near" + "\n");
+            if(checkMonster(x1,y1))
+                MainActivity.terminal.append("Monster is near" + "\n");
+
+            MainActivity.movement.addLast(String.valueOf(x1)+String.valueOf(y1));
+    }
+
 
     public boolean checkMonster(int i, int j){
         if(i == 0 && j == 0){
@@ -238,5 +160,6 @@ public class Move {
         }
         return false;
     }
+    
 
 }
